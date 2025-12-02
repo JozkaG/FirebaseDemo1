@@ -30,6 +30,9 @@ public class PrimaryController {
     private TextField nameTextField;
 
     @FXML
+    private TextField phoneTextField;
+
+    @FXML
     private TextArea outputTextArea;
 
     @FXML
@@ -91,17 +94,24 @@ public class PrimaryController {
         try
         {
             documents = future.get().getDocuments();
-            if(documents.size()>0)
+            if (documents.size() > 0)
             {
-                System.out.println("Getting (reading) data from firabase database....");
+                System.out.println("Getting (reading) data from firebase database....");
                 listOfUsers.clear();
+                outputTextArea.clear();
+
                 for (QueryDocumentSnapshot document : documents)
                 {
-                    outputTextArea.setText(outputTextArea.getText()+ document.getData().get("Name")+ " , Age: "+
-                            document.getData().get("Age")+ " \n ");
-                    System.out.println(document.getId() + " => " + document.getData().get("Name"));
-                    person  = new Person(String.valueOf(document.getData().get("Name")),
-                            Integer.parseInt(document.getData().get("Age").toString()));
+                    String name = String.valueOf(document.getData().get("Name"));
+                    String ageStr = String.valueOf(document.getData().get("Age"));
+                    String phone = String.valueOf(document.getData().get("Phone"));
+                    outputTextArea.appendText(
+                            name + " , Age: " + ageStr + " , Phone: " + phone + " \n"
+                    );
+                    System.out.println(document.getId() + " => " + name);
+                    person = new Person(name,
+                            Integer.parseInt(ageStr),
+                            phone);
                     listOfUsers.add(person);
                 }
             }
@@ -109,8 +119,7 @@ public class PrimaryController {
             {
                 System.out.println("No data");
             }
-            key=true;
-
+            key = true;
         }
         catch (InterruptedException | ExecutionException ex)
         {
@@ -150,6 +159,7 @@ public class PrimaryController {
         Map<String, Object> data = new HashMap<>();
         data.put("Name", nameTextField.getText());
         data.put("Age", Integer.parseInt(ageTextField.getText()));
+        data.put("Phone", phoneTextField.getText());
 
         //asynchronously write data
         ApiFuture<WriteResult> result = docRef.set(data);
